@@ -57,7 +57,7 @@ export const signup = async (req: Request, res: Response) => {
   };
   
 
-
+  // deleted users
   export const deleteUserByEmail = async (req: Request, res: Response) => {
     try {
       const { email } = req.body;
@@ -72,6 +72,31 @@ export const signup = async (req: Request, res: Response) => {
       await prisma.user.delete({ where: { email } });
   
       res.status(200).json({ message: `User ${email} deleted successfully` });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal server error');
+    }
+  };
+  
+
+  // retrive all emails in selectedUser table
+  export const getSelectedUserEmails = async (req: Request, res: Response) => {
+    try {
+      const selectedUsers = await prisma.selecteduser.findMany({
+        include: {
+          reservation: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+  
+      const userEmails = selectedUsers.map((selectedUser) => {
+        return selectedUser.reservation.user.email;
+      });
+  
+      res.json(userEmails);
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal server error');

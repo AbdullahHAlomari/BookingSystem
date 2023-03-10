@@ -4,7 +4,7 @@ import {auth} from './../middleware/auth'
 let router = express.Router()
 import {z} from 'zod'
 import { createReservation, createTicket, deleteReservationByUserId } from '../controller/ticketCont'
-import { deleteUserByEmail, login, signup } from '../controller/userCont'
+import { deleteUserByEmail, getSelectedUserEmails, login, signup } from '../controller/userCont'
 
 // Ticket section
 router.post("/ticket", createTicket)
@@ -15,6 +15,7 @@ router.delete('/deletereserve', deleteReservationByUserId)
 router.post('/signup', signup)
 router.post('/login', login)
 router.delete('/deleteuser', deleteUserByEmail)
+router.get('/getemails', getSelectedUserEmails)
 
 
 

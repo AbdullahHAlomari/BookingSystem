@@ -1,4 +1,4 @@
-import {PrismaClient} from '@prisma/client'
+import {Prisma, PrismaClient} from '@prisma/client'
 import { error } from 'console';
 const prisma = new PrismaClient();
 import express, {Request,Response} from 'express';
@@ -7,7 +7,18 @@ import * as jwt from 'jsonwebtoken'
 import e from 'express';
 import * as dotenv from 'dotenv'
 
-export const createTicket = async(req:Request, res:Response) => {
+
+// import { PrismaClient } from '@prisma/client';
+// import express, { Request, Response } from 'express';
+// import * as argon2 from 'argon2';
+// import * as jwt from 'jsonwebtoken';
+// import * as dotenv from 'dotenv';
+
+// const prisma = new PrismaClient();
+
+// dotenv.config();
+
+export const createTicket = async (req: Request, res: Response) => {
   try {
     const { event, availableQty } = req.body;
     const ticket = await prisma.ticket.create({
@@ -17,12 +28,51 @@ export const createTicket = async(req:Request, res:Response) => {
       },
     });
 
+    setTimeout(async () => {
+      // Get all reservations for this ticket
+      const reservations = await prisma.reservation.findMany({
+        where: {
+          ticketId: ticket.id,
+        },
+        include: {
+          user: true,
+        },
+      });
+    
+      // Randomly select users equal to availableQty
+      const selectedUsers = [];
+      const totalReservations = reservations.length;
+      const usedIndices = new Set();
+      for (let i = 0; i < availableQty && i < totalReservations; i++) {
+        let randomIndex = Math.floor(Math.random() * totalReservations);
+        while (usedIndices.has(randomIndex)) {
+          randomIndex = Math.floor(Math.random() * totalReservations);
+        }
+        usedIndices.add(randomIndex);
+        selectedUsers.push({
+          id: `${ticket.id}_${reservations[randomIndex].userId}`, // Add ID based on ticket ID and user ID
+          reservationId: reservations[randomIndex].id,
+          userId: reservations[randomIndex].userId,
+          ticketId: reservations[randomIndex].ticketId,
+          expirationTime: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes in milliseconds
+        });
+      }
+    
+      // Add selected users to selecteduser database
+      await prisma.selecteduser.createMany({
+        data: selectedUsers,
+      });
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+
     res.status(201).json(ticket);
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal server error');
   }
 };
+
+
+
 export const createReservation = async (req: Request, res: Response) => {
     try {
       const { ticketId, email, firstName, lastName } = req.body;
