@@ -12,11 +12,11 @@ function Routers() {
   return (
     <Routes>
       <Route path="*" element={<Error404 />} />
-      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<SignUp />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/Tickets" element={<MainTicket />} />
       <Route path="/post" element={<AddTicket />} />
-      {/* <Route path="/Ticket/:id" element={<FindEvent />} /> */}
+      <Route path="/Ticket/:id" element={<FindEvent />} />
     </Routes>
   );
 }
