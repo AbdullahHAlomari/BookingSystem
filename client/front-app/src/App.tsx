@@ -1,9 +1,9 @@
-import Routers from "./components/routers/Routers";
+import Mains from "./components/Mains";
 
 function App() {
   return (
     <div className="App">
-      <Routers />
+      <Mains />
     </div>
   );
 }
