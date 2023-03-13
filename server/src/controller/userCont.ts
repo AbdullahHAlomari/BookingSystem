@@ -8,25 +8,32 @@ import e from 'express';
 import * as dotenv from 'dotenv'
 
 export const signup = async (req: Request, res: Response) => {
-    try {
-      const { email, firstname, lastname, password } = req.body;
-      const hashedPassword = await argon2.hash(password);
-  
-      const user = await prisma.user.create({
-        data: {
-          email,
-          firstname,
-          lastname,
-          password: hashedPassword,
-        },
-      });
-  
-      res.json(user);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "Something went wrong" });
+  try {
+    const { email, firstname, lastname, password } = req.body;
+    const hashedPassword = await argon2.hash(password);
+
+    let Role = "user"; // default role is user
+    if (email.toLowerCase() === "abalomari95@gmail.com") {
+      Role = "admin";
     }
-  };
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        firstname,
+        lastname,
+        Role,
+        password: hashedPassword,
+      },
+    });
+
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
+
   
 
   export const login = async (req: Request, res: Response) => {
@@ -47,7 +54,7 @@ export const signup = async (req: Request, res: Response) => {
         return res.status(401).json({ error: "Invalid password" });
       }
   
-      const token = jwt.sign({ userId: user.id }, process.env.API_SECRET as string);
+      const token = jwt.sign({ userId: user.id }, process.env.API_SECRET as string, {expiresIn: "3h"});
   
       res.json({ token });
     } catch (error) {
@@ -103,3 +110,14 @@ export const signup = async (req: Request, res: Response) => {
     }
   };
   
+
+  // Delete all users
+export const deleteAllUsers = async (req: Request, res: Response) => {
+  try {
+    const deletedUsers = await prisma.user.deleteMany();
+    res.status(200).json({ message: `Deleted ${deletedUsers.count} selected Users` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+};
