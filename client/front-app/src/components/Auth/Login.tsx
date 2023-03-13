@@ -16,9 +16,11 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
+import axios from 'axios'
 
 export default function SignupCard() {
   const [showPassword, setShowPassword] = useState(false);
+  
 
   return (
     <Flex
