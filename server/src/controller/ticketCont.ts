@@ -7,9 +7,9 @@ import * as jwt from 'jsonwebtoken'
 import e from 'express';
 import * as dotenv from 'dotenv'
 import nodemailer from 'nodemailer';
-import sgMail, { MailDataRequired } from '@sendgrid/mail'
+// import sgMail, { MailDataRequired } from '@sendgrid/mail'
 dotenv.config();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
 
 ///////////////////
