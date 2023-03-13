@@ -6,70 +6,249 @@ import * as argon2 from 'argon2'
 import * as jwt from 'jsonwebtoken'
 import e from 'express';
 import * as dotenv from 'dotenv'
+import nodemailer from 'nodemailer';
+import sgMail, { MailDataRequired } from '@sendgrid/mail'
+dotenv.config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
 
-// import { PrismaClient } from '@prisma/client';
-// import express, { Request, Response } from 'express';
-// import * as argon2 from 'argon2';
-// import * as jwt from 'jsonwebtoken';
-// import * as dotenv from 'dotenv';
-
-// const prisma = new PrismaClient();
-
-// dotenv.config();
-
+///////////////////
+// best version of create function
 export const createTicket = async (req: Request, res: Response) => {
   try {
-    const { event, availableQty } = req.body;
+
+    // Create ticket
+    const { event, availableQty, location, description, image, price } = req.body;
     const ticket = await prisma.ticket.create({
       data: {
+        image,
         event,
         availableQty,
+        location,
+        description,
+        // price
       },
     });
 
     setTimeout(async () => {
-      // Get all reservations for this ticket
-      const reservations = await prisma.reservation.findMany({
-        where: {
-          ticketId: ticket.id,
-        },
-        include: {
-          user: true,
-        },
-      });
-    
-      // Randomly select users equal to availableQty
-      const selectedUsers = [];
-      const totalReservations = reservations.length;
-      const usedIndices = new Set();
-      for (let i = 0; i < availableQty && i < totalReservations; i++) {
-        let randomIndex = Math.floor(Math.random() * totalReservations);
-        while (usedIndices.has(randomIndex)) {
-          randomIndex = Math.floor(Math.random() * totalReservations);
-        }
-        usedIndices.add(randomIndex);
-        selectedUsers.push({
-          id: `${ticket.id}_${reservations[randomIndex].userId}`, // Add ID based on ticket ID and user ID
-          reservationId: reservations[randomIndex].id,
-          userId: reservations[randomIndex].userId,
-          ticketId: reservations[randomIndex].ticketId,
-          expirationTime: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes in milliseconds
+      try {
+        // Get all reservations for ticket
+        const reservations = await prisma.reservation.findMany({
+          where: {
+            ticketId: ticket.id,
+          },
+          include: {
+            user: true,
+          },
         });
-      }
+
+        // Select user random equal to ticket
+        const selectedUsers = [];
+        const totalReservations = reservations.length;
+        const usedIndices = new Set();
+        for (let i = 0; i < availableQty && i < totalReservations; i++) {
+          let randomIndex = Math.floor(Math.random() * totalReservations);
+          while (usedIndices.has(randomIndex)) {
+            randomIndex = Math.floor(Math.random() * totalReservations);
+          }
+          usedIndices.add(randomIndex);
+          selectedUsers.push({
+            id: `${ticket.id}_${reservations[randomIndex].userId}`,
+            reservationId: reservations[randomIndex].id,
+            userId: reservations[randomIndex].userId,
+            ticketId: reservations[randomIndex].ticketId,
+            expirationTime: new Date(Date.now() + 3 * 60 * 1000), // 3 minutes in milliseconds
+          });
+        }
+
+        // Add selected users to selecteduser database
+        await prisma.selecteduser.createMany({
+          data: selectedUsers,
+        });
+
+                // Send email to each selected user
+                const transporter = nodemailer.createTransport({
+                  service: "gmail",
+                  auth: {
+                    user: process.env.EMAIL_FROM,
+                    pass: process.env.EMAIL_PWD,
+                  },
+                });
+        
+                for (const selectedUser of selectedUsers) {
+                  const user = await prisma.user.findUnique({ where: { id: selectedUser.userId } });
+                  if (!user) {
+                    console.error(`User with id ${selectedUser.userId} not found`);
+                    continue;
+                  }
+                  const email = {
+                    from: process.env.EMAIL_FROM,
+                    to: user.email,
+                    subject: "You've been selected for a ticket!",
+                    text: `Congratulations! You have been selected to purchase a ticket for ${ticket.event}. Please follow this link to purchase the ticket before it expires: http://example.com/purchase/${selectedUser.id}`,
+                  };
+                
+                  transporter.sendMail(email, (error, info) => {
+                    if (error) {
+                      console.error(error);
+                    } else {
+                      console.log(`Email sent to ${user.email}: ${info.response}`);
+                    }
+                  });
+                }
+
+        // Check if any selected user is not purchased the ticket after 3 minutes
+        setTimeout(async () => {
+          try {
+            const expiredSelectedUsers = await prisma.selecteduser.findMany({
+              where: {
+                ticketId: ticket.id,
+                isPurchased: false,
+                expirationTime: {
+                  lte: new Date(),
+                },
+              },
+            });
+
+            for (const selectedUser of expiredSelectedUsers) {
+              // Remove the expired selected user
+              await prisma.selecteduser.delete({
+                where: {
+                  id: selectedUser.id,
+                },
+              });
+
+              // Find another user to replace the expired selected user
+              const availableReservations = await prisma.reservation.findMany({
+                where: {
+                  ticketId: ticket.id,
+                  AND: [
+                    {
+                      id: {
+                        not: selectedUser.reservationId,
+                      },
+                    },
+                    {
+                      selecteduser: {
+                        none: {
+                          id: selectedUser.id,
+                        },
+                      },
+                    },
+                  ],
+                },
+                take: 1,
+              });
+
+              if (availableReservations.length > 0) {
+                // Add the new selected user
+                const newSelectedUser = {
+                  id: `${ticket.id}_${availableReservations[0].userId}`,
+                  reservationId: availableReservations[0].id,
+                  userId: availableReservations[0].userId,
+                  ticketId: availableReservations[0].ticketId,
+                  expirationTime: new Date(Date.now() + 3 * 60 * 1000), // 3 minutes in milliseconds
+                };
+
+                await prisma.selecteduser.create({
+                  data: newSelectedUser,
+                });
+                  // Send email to the new selected user
+  const user = await prisma.user.findUnique({ where: { id: availableReservations[0].userId } });
+  if (!user) {
+    console.error(`User with id ${availableReservations[0].userId} not found`);
+    return;
+  }
+  const email = {
+    from: process.env.EMAIL_FROM,
+    to: user.email,
+    subject: "You've been selected for a ticket!",
+    text: `Congratulations! You have been selected to purchase a ticket for ${ticket.event}. Please follow this link to purchase the ticket before it expires: http://example.com/purchase/${newSelectedUser.id}`,
+  };
     
-      // Add selected users to selecteduser database
-      await prisma.selecteduser.createMany({
-        data: selectedUsers,
-      });
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+  transporter.sendMail(email, (error, info) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(`Email sent to ${user.email}: ${info.response}`);
+    }
+  });
+}
+            }
+          } catch (error) {
+            console.error(error);
+          }
+        }, 3 * 60 * 1000); // 3 minutes
+      } catch (error) {
+        console.error(error);
+      }
+    }, 2 * 60 * 1000); // 5 minutes
 
     res.status(201).json(ticket);
   } catch (error) {
+
     console.error(error);
     res.status(500).send('Internal server error');
-  }
-};
+  }};
+
+
+
+//////////////
+
+
+
+// export const createTicket = async (req: Request, res: Response) => {
+//   try {
+//     const { event, availableQty } = req.body;
+//     const ticket = await prisma.ticket.create({
+//       data: {
+//         event,
+//         availableQty,
+//       },
+//     });
+
+//     setTimeout(async () => {
+//       // Get all reservations for this ticket
+//       const reservations = await prisma.reservation.findMany({
+//         where: {
+//           ticketId: ticket.id,
+//         },
+//         include: {
+//           user: true,
+//         },
+//       });
+    
+//       // Randomly select users equal to availableQty
+//       const selectedUsers = [];
+//       const totalReservations = reservations.length;
+//       const usedIndices = new Set();
+//       for (let i = 0; i < availableQty && i < totalReservations; i++) {
+//         let randomIndex = Math.floor(Math.random() * totalReservations);
+//         while (usedIndices.has(randomIndex)) {
+//           randomIndex = Math.floor(Math.random() * totalReservations);
+//         }
+//         usedIndices.add(randomIndex);
+//         selectedUsers.push({
+//           id: `${ticket.id}_${reservations[randomIndex].userId}`, // Add ID based on ticket ID and user ID
+//           reservationId: reservations[randomIndex].id,
+//           userId: reservations[randomIndex].userId,
+//           ticketId: reservations[randomIndex].ticketId,
+//           expirationTime: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes in milliseconds
+//         });
+//       }
+    
+//       // Add selected users to selecteduser database
+//       await prisma.selecteduser.createMany({
+//         data: selectedUsers,
+//       });
+//     }, 5 * 60 * 1000); // 5 minutes in milliseconds
+
+//     res.status(201).json(ticket);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Internal server error');
+//   }
+// };
 
 
 
@@ -127,4 +306,40 @@ export const createReservation = async (req: Request, res: Response) => {
       res.status(500).send('Internal server error');
     }
   };
+
+
+  // Delete all reservations
+export const deleteAllReservations = async (req: Request, res: Response) => {
+  try {
+    const deletedReservations = await prisma.reservation.deleteMany();
+
+    res.status(200).json({ message: `Deleted ${deletedReservations.count} reservations` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+};
+
+// delete all selected user
+export const deleteAllSelectedUsers = async (req: Request, res: Response) => {
+  try {
+    const deletedSelectedUsers = await prisma.selecteduser.deleteMany();
+    res.status(200).json({ message: `Deleted ${deletedSelectedUsers.count} selected users` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+};
+
+// Delete all tickets
+export const deleteAllTickets = async (req: Request, res: Response) => {
+  try {
+    const deletedTickets = await prisma.ticket.deleteMany();
+    res.status(200).json({ message: `Deleted ${deletedTickets.count} selected tickets` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+};
+
   

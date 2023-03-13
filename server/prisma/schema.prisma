@@ -22,8 +22,11 @@ model reservation {
 
 model ticket {
   id           String         @id @default(uuid())
+  image        String
   event        String
   availableQty Int
+  location     String
+  description  String
   reservations reservation[]
   selecteduser selecteduser[]
 }
@@ -34,6 +37,7 @@ model user {
   firstname    String
   lastname     String
   password     String
+  Role         String
   reservations reservation[]
   selecteduser selecteduser[]
 }
