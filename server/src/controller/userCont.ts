@@ -85,7 +85,6 @@ export const signup = async (req: Request, res: Response) => {
     }
   };
   
-
   // retrive all emails in selectedUser table
   export const getSelectedUserEmails = async (req: Request, res: Response) => {
     try {
