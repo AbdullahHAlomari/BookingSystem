@@ -1,5 +1,10 @@
 import React from 'react'
-    import {
+import { Splide, SplideSlide, SplideTrack } from '@splidejs/react-splide';
+// Default theme
+import '@splidejs/react-splide/css';
+// End Slider imports
+// card imports
+import {
   Box,
   Center,
   useColorModeValue,
@@ -10,18 +15,29 @@ import React from 'react'
   SimpleGrid,
 } from '@chakra-ui/react';
 import data from '../component/DataCards.json'
-function Card() {
-  const IMAGE =
+const IMAGE =
   'https://images.unsplash.com/photo-1518051870910-a46e30d9db16?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1350&q=80';
-
-
+function HomePage() {
   return (
     <>
+    {/* strat image slider */}
+    <Splide aria-label="My Favorite Images" options={{type:'fade'
+      ,rewind:true,speed:2000,rewindByDrag:true, rewindSpeed:2000,}}>
+  <SplideSlide>
+    <img src="https://s3.ticketmx.com/uploads/images/182b2df9c13e6f94da1ade102199c192e71ee791.jpeg?w=1920&h=700&mode=crop&bgcolor=black&format=jpg" alt="Image 1"/>
+  </SplideSlide>
+  <SplideSlide>
+    <img src="https://s3.ticketmx.com/uploads/images/1c6513a267595fd2d11c0213e2a692798966f68c.png?w=1920&h=700&mode=crop&bgcolor=black&format=jpg" alt="Image 2"/>
+  </SplideSlide>
+  <SplideSlide>
+    <img src="https://s3.ticketmx.com/uploads/images/a2397f600f554df37ff3223a85d616d8edeb603b.png?w=1920&h=700&mode=crop&bgcolor=black&format=jpg" alt="Image 3"/>
+  </SplideSlide>
+</Splide>
+        {/* End image slider */}
+        {/* Start Cards */}
 
-
-    
-    <Center py={12}>
-      <SimpleGrid columns={3} spacingX={5} spacingY={15} >
+        <Center py={12}>
+      <SimpleGrid columns={{base:1,sm:2,md:3}} spacingX={{base:0,sm:2,md:4,lg:6}} spacingY={15} >
         {data.map((item)=>
       <Box
         role={'group'}
@@ -58,7 +74,7 @@ function Card() {
           <Image
             rounded={'lg'}
             height={230}
-            width={282}
+            width={285}
             objectFit={'cover'}
             src={item.image}
           />
@@ -83,12 +99,12 @@ function Card() {
       )}
       </SimpleGrid>
     </Center>
-  
-
         
-    </>
     
+    
+    
+    </>
   )
 }
 
-export default Card
+export default HomePage

@@ -1,16 +1,15 @@
 import { useState } from 'react'
-import Card from './component/Card'
-import ImageSlider from './component/ImageSlider'
 import Event from './component/Event'
+import HomePage from './component/HomePage'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-    <Event/>
-    {/* <ImageSlider/> */}
-    {/* <Card/> */}
+    
+    {/* <Event/> */}
+    <HomePage/>
     </>
   )
 }

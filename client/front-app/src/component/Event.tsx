@@ -28,16 +28,15 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import PaidOutlinedIcon from "@mui/icons-material/PaidOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Link } from "react-router-dom";
+
+
 const prI = 50;
+const mapImage ="https://pngimg.com/d/google_maps_pin_PNG3.png"
 // <-- import styles to be used
 const data = {
-  isNew: true,
   imageURL:
-    "https://images.unsplash.com/photo-1572635196237-14b3f281503f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=4600&q=80",
-  name: "Wayfarer Classic",
-  price: 4.5,
-  rating: 4.2,
-  numReviews: 34,
+    "https://s3.ticketmx.com/uploads/images/182b2df9c13e6f94da1ade102199c192e71ee791.jpeg?w=1920&h=700&mode=crop&bgcolor=black&format=jpg",
 };
 
 interface RatingProps {
@@ -60,13 +59,13 @@ function Event() {
         >
           <Box>
           <Center>
-            <Image src="https://bit.ly/dan-abramov" alt="Dan Abramov"
+            <Image src={data.imageURL} alt=""
             borderWidth="5px"
             rounded={"sm"}
             shadow="lg"
             borderRadius={"lg"} />
           </Center>
-          <Spacer h={"10"}/>
+          <Spacer h={"5"}/>
           </Box>
           <Heading textAlign={"right"} mb="1">
             ورشة صناعة النسيج للبالغين
@@ -84,7 +83,7 @@ function Event() {
             justify={"center"}
             align={"center"}
           >
-            <SimpleGrid bg={""} textAlign={"right"} w={"100%"} spacingY={"4"} m={"2"}   >
+            <SimpleGrid bg={""} textAlign={"right"} w={"100%"} spacingY={"7"} m={"2"}   >
               <Stack
                 direction={"row"}
                 justify={"end"}
@@ -131,7 +130,8 @@ function Event() {
                 <Text> :الوصف</Text> <InfoOutlinedIcon color="primary" />
               </Stack>
             </SimpleGrid>
-            <SimpleGrid columns={1} spacingY="10" w={"100%"} m={"2"}>
+            <SimpleGrid columns={1} spacingY="6" w={"100%"} m={"2"}>
+              
               <HStack  justify="center">
                 <Text>--d-d-d--d---d-d-d--d---d-d-d--d-</Text>
                 <Text> :السعر</Text> <PaidOutlinedIcon color="primary" />
@@ -141,6 +141,8 @@ function Event() {
                   احجز الآن
                 </Button>
               </HStack>
+              
+              <HStack justify={"center"} ><Link to={""}><Image   w={"120px "} src={mapImage}></Image></Link></HStack>
             </SimpleGrid>
           </Flex>
         </Box>
