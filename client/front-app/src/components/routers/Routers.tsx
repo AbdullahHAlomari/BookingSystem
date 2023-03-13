@@ -13,6 +13,7 @@ function Routers() {
     <Routes>
       <Route path="*" element={<Error404 />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<SignUp />} />
       <Route path="/Tickets" element={<MainTicket />} />
       <Route path="/post" element={<AddTicket />} />
       {/* <Route path="/Ticket/:id" element={<FindEvent />} /> */}
