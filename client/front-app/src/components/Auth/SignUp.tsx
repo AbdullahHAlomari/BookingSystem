@@ -14,7 +14,7 @@ import {
   useColorModeValue,
   Link,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 
@@ -24,6 +24,14 @@ export default function LoginCard() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Redirect user to the dashboard page if token is available
+      window.location.href = '/dashboard';
+    }
+  }, []);
+
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -31,7 +39,9 @@ export default function LoginCard() {
         email,
         password,
       });
-      console.log(response.data.token);
+      localStorage.setItem('token', response.data.token);
+      // Redirect user to the dashboard page after successful login
+      window.location.href = '/dashboard';
     } catch (error) {
       setError('Invalid email or password');
       console.log(error);
@@ -108,26 +118,18 @@ export default function LoginCard() {
             </Stack>
           </form>
           <Stack pt={6}>
-            <Text align={'center'}>
-              You don't have an account?{' '}
-              <Link color={'blue.400'}>Sign up</Link>
-            </Text>
-          </Stack>
-        </Box>
-
-      </Stack>
-    </Flex>
-  );
+          <Text fontSize={'sm'} color={'gray.600'} align={'center'}>
+Don't have an account?{' '}
+<Link color={'blue.400'} href={'/signup'}>
+Sign up
+</Link>
+</Text>
+</Stack>
+</Box>
+</Stack>
+</Flex>
+);
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -163,25 +165,20 @@ export default function LoginCard() {
 //   const [showPassword, setShowPassword] = useState(false);
 //   const [email, setEmail] = useState('');
 //   const [password, setPassword] = useState('');
-//   const [isLoading, setIsLoading] = useState(false);
 //   const [error, setError] = useState('');
 
-//   const handleLogin = async () => {
-//     setIsLoading(true);
-//     setError('');
-
+//   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+//     event.preventDefault();
 //     try {
 //       const response = await axios.post('http://localhost:3008/login', {
 //         email,
 //         password,
 //       });
-//       const token = response.data.token;
-//       // do something with the token, such as saving it to local storage
+//       console.log(response.data.token);
 //     } catch (error) {
-//       setError(error.response.data.error);
+//       setError('Invalid email or password');
+//       console.log(error);
 //     }
-
-//     setIsLoading(false);
 //   };
 
 //   return (
@@ -204,50 +201,63 @@ export default function LoginCard() {
 //           bg={useColorModeValue('white', 'gray.700')}
 //           boxShadow={'lg'}
 //           p={8}>
-//           <Stack spacing={4}>
-//             <FormControl id="email" isRequired>
-//               <FormLabel>Email address</FormLabel>
-//               <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-//             </FormControl>
-//             <FormControl id="password" isRequired>
-//               <FormLabel>Password</FormLabel>
-//               <InputGroup>
-//                 <Input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} />
-//                 <InputRightElement h={'full'}>
-//                   <Button
-//                     variant={'ghost'}
-//                     onClick={() => setShowPassword((showPassword) => !showPassword)}>
-//                     {showPassword ? <ViewIcon /> : <ViewOffIcon />}
-//                   </Button>
-//                 </InputRightElement>
-//               </InputGroup>
-//             </FormControl>
-//             <Stack spacing={10} pt={2}>
-//               <Button
-//                 isLoading={isLoading}
-//                 loadingText="Submitting"
-//                 size="lg"
-//                 bg={'blue.400'}
-//                 color={'white'}
-//                 _hover={{
-//                   bg: 'blue.500',
-//                 }}
-//                 onClick={handleLogin}>
-//                 LOGIN
-//               </Button>
+//           <form onSubmit={handleLogin}>
+//             <Stack spacing={4}>
+//               <FormControl id="email" isRequired>
+//                 <FormLabel>Email address</FormLabel>
+//                 <Input
+//                   type="email"
+//                   value={email}
+//                   onChange={(event) => setEmail(event.target.value)}
+//                 />
+//               </FormControl>
+//               <FormControl id="password" isRequired>
+//                 <FormLabel>Password</FormLabel>
+//                 <InputGroup>
+//                   <Input
+//                     type={showPassword ? 'text' : 'password'}
+//                     value={password}
+//                     onChange={(event) => setPassword(event.target.value)}
+//                   />
+//                   <InputRightElement h={'full'}>
+//                     <Button
+//                       variant={'ghost'}
+//                       onClick={() =>
+//                         setShowPassword((showPassword) => !showPassword)
+//                       }>
+//                       {showPassword ? <ViewIcon /> : <ViewOffIcon />}
+//                     </Button>
+//                   </InputRightElement>
+//                 </InputGroup>
+//               </FormControl>
+//               <Stack spacing={10} pt={2}>
+//                 {error && (
+//                   <Text color={'red.500'} fontSize={'sm'}>
+//                     {error}
+//                   </Text>
+//                 )}
+//                 <Button
+//                   type="submit"
+//                   loadingText="Submitting"
+//                   size="lg"
+//                   bg={'blue.400'}
+//                   color={'white'}
+//                   _hover={{
+//                     bg: 'blue.500',
+//                   }}>
+//                   LOGIN
+//                 </Button>
+//               </Stack>
 //             </Stack>
-//             {error && (
-//               <Text color="red.500" fontSize="sm">
-//                 {error}
-//               </Text>
-//             )}
-//             <Stack pt={6}>
-//               <Text align={'center'}>
-//                 You don't have an account? <Link color={'blue.400'}>Sign up</Link>
-//               </Text>
-//             </Stack>
+//           </form>
+//           <Stack pt={6}>
+//             <Text align={'center'}>
+//               You don't have an account?{' '}
+//               <Link color={'blue.400'}>Sign up</Link>
+//             </Text>
 //           </Stack>
 //         </Box>
+
 //       </Stack>
 //     </Flex>
 //   );

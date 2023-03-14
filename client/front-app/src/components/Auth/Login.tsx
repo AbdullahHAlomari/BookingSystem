@@ -18,7 +18,7 @@ import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { FormEvent, useState } from 'react';
 import axios from 'axios';
 
-export default function SignupCard() {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [firstname, setFirstname] = useState("");
@@ -46,14 +46,15 @@ export default function SignupCard() {
 
   return (
     <Flex
-      minH={'100vh'}
-      align={'center'}
-      justify={'center'}
-      bg={useColorModeValue('gray.50', 'gray.800')}>
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
-        <Stack align={'center'}>
-          <Heading fontSize={'4xl'} textAlign={'center'}>
-            SIGN-UP
+      minH={"100vh"}
+      align={"center"}
+      justify={"center"}
+      bg={useColorModeValue("gray.50", "gray.800")}
+    >
+      <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
+        <Stack align={"center"}>
+          <Heading fontSize={"4xl"} textAlign={"center"}>
+            LOG-IN
           </Heading>
           <Text fontSize={'lg'} color={'gray.600'}>
             Enjoy booking tickets with ease
