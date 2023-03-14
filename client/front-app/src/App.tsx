@@ -1,17 +1,11 @@
-import { useState } from 'react'
-import Event from './component/Event'
-import HomePage from './component/HomePage'
+import Mains from "./components/Mains";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    
-    {/* <Event/> */}
-    <HomePage/>
-    </>
-  )
+    <div className="App">
+      <Mains />
+    </div>
+  );
 }
 
-export default App
+export default App;

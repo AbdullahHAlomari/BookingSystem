@@ -92,18 +92,18 @@ const data=
     thumbnail:"https://s3.ticketmx.com/uploads/images/31889a32c9910c10f7622817b14f448859e86bc3.jpg?w=750&h=750&mode=crop&bgcolor=black&format=jpg",
     image:"https://s3.ticketmx.com/uploads/images/a9351993b55e6573c4ca9194d00edb06e13b2411.jpg?w=1920&h=700&mode=crop&bgcolor=black&format=jpg"
   },
-  {
-    id:"",
-    name:"", 
-    date:"",
-    time:"",
-    city:"",
-    place:"",
-    placeLink:"",
-    price:"",
-    description:"",
-    thumbnail:"",
-    image:""
-  }
+  // {
+  //   id:"",
+  //   name:"", 
+  //   date:"",
+  //   time:"",
+  //   city:"",
+  //   place:"",
+  //   placeLink:"",
+  //   price:"",
+  //   description:"",
+  //   thumbnail:"",
+  //   image:""
+  // }
 ]
 export default data
