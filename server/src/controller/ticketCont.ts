@@ -85,7 +85,7 @@ export const createTicket = async (req: Request, res: Response) => {
                     from: process.env.EMAIL_FROM,
                     to: user.email,
                     subject: "You've been selected for a ticket!",
-                    text: `Congratulations! You have been selected to purchase a ticket for ${ticket.event}. Please follow this link to purchase the ticket before it expires: http://example.com/purchase/${selectedUser.id}`,
+                    text: `Congratulations! You have been selected to purchase a ticket for ${ticket.event}.`,
                   };
                 
                   transporter.sendMail(email, (error, info) => {
